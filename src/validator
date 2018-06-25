@@ -1,0 +1,208 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Enumeration;
+import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+
+public class favalidator extends JFrame implements ActionListener {
+    private static final long serialVersionUID = 1L;
+    private JButton checkButton;
+    private JTextPane textPane;
+    private JFileChooser chooser;
+    private Vector<String> directory;
+    private static int num_issues;
+    private static int num_warnings;
+    private ZipFile zf;
+    private SimpleAttributeSet warning;
+    private SimpleAttributeSet error;
+    private SimpleAttributeSet report;
+    private String dir;
+    private static final int RED = 0;
+    private static final int BLUE = 2;
+
+    public favalidator() {
+        this.setTitle("faValidator");
+        this.setSize(700, 900);
+        this.setVisible(true);
+        this.setDefaultCloseOperation(3);
+        this.setResizable(false);
+        Container panel = this.getContentPane();
+        this.checkButton = new JButton("Scan file...");
+        this.checkButton.addActionListener(this);
+        panel.add(this.checkButton, "First");
+        this.textPane = new JTextPane();
+        this.textPane.setEditable(false);
+        this.warning = new SimpleAttributeSet();
+        this.error = new SimpleAttributeSet();
+        this.report = new SimpleAttributeSet();
+        StyleConstants.setForeground(this.warning, new Color(6, 61, 18));
+        StyleConstants.setForeground(this.error, Color.RED);
+        StyleConstants.setForeground(this.report, Color.BLUE);
+        panel.add(new JScrollPane(this.textPane), "Center");
+        JLabel rights = new JLabel("Programmed for MRM by Jonatan Bilstein");
+        panel.add(rights, "Last");
+        this.validate();
+        this.directory = new Vector();
+        this.erasePreviousInfo();
+    }
+
+    public static void main(String[] args) {
+        new favalidator();
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == this.checkButton) {
+            this.erasePreviousInfo();
+            this.chooser = new JFileChooser();
+            this.chooser.setFileSelectionMode(0);
+            this.chooser.setFileFilter(new TypeOfFile());
+            int returnVal = this.chooser.showOpenDialog(this);
+            if (returnVal == 0) {
+                this.dir = this.chooser.getCurrentDirectory() + "\\" + this.chooser.getSelectedFile().getName();
+                this.textPaneAppend("Scanning file: " + this.dir + "\n\n", 2);
+                this.listFilenames();
+                this.checkFiles();
+                this.revisePaths();
+                this.displayNumissues();
+            }
+        }
+
+    }
+
+    private void listFilenames() {
+        try {
+            this.zf = new ZipFile(this.dir);
+            Enumeration entries = this.zf.entries();
+
+            while(entries.hasMoreElements()) {
+                String zipEntryName = ((ZipEntry)entries.nextElement()).getName();
+                this.directory.addElement(zipEntryName);
+            }
+
+            this.zf.close();
+        } catch (IOException var3) {
+            this.textPaneAppend("Could not read file.", 0);
+        }
+
+    }
+
+    private void checkFiles() {
+        Enumeration entries = this.directory.elements();
+
+        while(entries.hasMoreElements()) {
+            String fileName = (String)entries.nextElement();
+            fileInfo file = new fileInfo(fileName);
+            int result = file.fileType();
+            switch(result) {
+            case 5:
+                ++num_issues;
+                this.textPaneAppend("Error: file " + fileName + " is not allowed in final assets\n", 0);
+            }
+        }
+
+    }
+
+    private void erasePreviousInfo() {
+        this.textPane.setText("");
+        this.directory.removeAllElements();
+        num_issues = 0;
+        num_warnings = 0;
+    }
+
+    private void displayNumissues() {
+        this.textPaneAppend("\nThe FA file has (" + num_issues + ") issue(s) to be checked\n", 2);
+    }
+
+    private void displayNumWarnings() {
+        this.textPaneAppend("The FA file has (" + num_warnings + ") warning(s) to be considered\n\n", 2);
+    }
+
+    private void textPaneAppend(String s, int color) {
+        try {
+            switch(color) {
+            case 0:
+                this.textPane.getStyledDocument().insertString(this.textPane.getStyledDocument().getLength(), s, this.error);
+                break;
+            case 1:
+                this.textPane.getStyledDocument().insertString(this.textPane.getStyledDocument().getLength(), s, this.warning);
+                break;
+            case 2:
+                this.textPane.getStyledDocument().insertString(this.textPane.getStyledDocument().getLength(), s, this.report);
+            }
+        } catch (Exception var4) {
+            System.err.println("Display error. Talk to Jonatan Bilstein or email him at jonatan.bilstein@mrmworldwide.com.ar");
+        }
+
+    }
+
+    private void revisePaths() {
+        String regex = "src=\".*\"";
+
+        try {
+            ZipFile sourceZipFile = new ZipFile(this.dir);
+            Enumeration e = sourceZipFile.entries();
+
+            while(true) {
+                ZipEntry entry;
+                do {
+                    if (!e.hasMoreElements()) {
+                        sourceZipFile.close();
+                        return;
+                    }
+
+                    entry = (ZipEntry)e.nextElement();
+                } while(!entry.getName().toLowerCase().endsWith(".html") && !entry.getName().toLowerCase().endsWith(".htm"));
+
+                InputStream is = sourceZipFile.getInputStream(entry);
+                InputStreamReader isr = new InputStreamReader(is);
+                BufferedReader br = new BufferedReader(isr);
+                int line = 0;
+
+                String strLine;
+                while((strLine = br.readLine()) != null) {
+                    ++line;
+                    Pattern pattern = Pattern.compile(regex);
+                    Matcher matcher = pattern.matcher(strLine);
+
+                    while(matcher.find()) {
+                        String match = matcher.group();
+                        match = match.replace("\"", "");
+                        match = match.substring(4);
+                        if (match.toLowerCase().startsWith("http://")) {
+                            this.textPane.getStyledDocument().insertString(this.textPane.getStyledDocument().getLength(), "Error " + entry.getName() + " line " + line + ": image path is not relative\n", this.error);
+                            ++num_issues;
+                        }
+                    }
+                }
+
+                br.close();
+                isr.close();
+                is.close();
+            }
+        } catch (Exception var13) {
+            System.err.println("Error: " + var13.getMessage());
+        }
+    }
+}
