@@ -12,7 +12,6 @@ public class GUI extends JFrame {
     private String script22;
     private String script33;
     private String script44;
-    //private JButton extract;
     private JButton browse;
     private JFileChooser chooser;
 
@@ -57,9 +56,6 @@ public class GUI extends JFrame {
                 this.revisePaths();
                 this.displayNumissues();*/
         });
-        //extract = new JButton("Extract links");
-        //extract.addActionListener((ActionEvent e) -> {});
-        //add(browse, BorderLayout.NORTH);
         add(panel, BorderLayout.NORTH);
         add(new JSeparator(), BorderLayout.CENTER);
         add(browse, BorderLayout.SOUTH);
