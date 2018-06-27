@@ -20,7 +20,7 @@ public class LinkExtractor extends JFrame {
 
     private LinkExtractor() {
 
-        setTitle("Email Stream Link Extractor");
+        setTitle("Email Stream Link Extractor v1.0");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         script1 = new JRadioButton("Desc cat1 cat2 Href");
@@ -34,7 +34,7 @@ public class LinkExtractor extends JFrame {
         scriptType.add(script4);
         script1.setSelected(true);
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(1, 5,0 , 0));
+        panel.setLayout(new GridLayout(1, 5, 0, 0));
         output = new JTextArea();
         output.setEditable(true);
         JButton browse = new JButton("Browse for template");
@@ -65,6 +65,7 @@ public class LinkExtractor extends JFrame {
         panel.add(browse);
         add(panel, BorderLayout.NORTH);
         add(new JScrollPane(output), BorderLayout.CENTER);
+        add(new JLabel(("Programmed by Paul Tanasa for the Optaros Email Team")), BorderLayout.SOUTH);
         browse.setPreferredSize(new Dimension(0, 50));
         setPreferredSize(new Dimension(800, 800));
         setResizable(true);
@@ -78,36 +79,37 @@ public class LinkExtractor extends JFrame {
 
     }
 
-
     private void getFirst(File html) throws IOException {
-        Elements links = Jsoup.parse(html, "UTF-8").getElementsByTag("a");
+        Elements links = Jsoup.parse(html, "UTF-8").select("a[href]");
+        output.setText("");
         for (Element link : links) {
-            output.append("description=" + link.attr("description") + "CAT1=" + link.attr("CAT1")
-                    + "CAT2=" + link.attr("CAT2") + "href=" + link.attr("href") + "\n");
+            output.append("description=\"" + link.attr("description") + "\" CAT1=\"" + link.attr("CAT1")
+                    + "\" CAT2=\"" + link.attr("CAT2") + "\" " + link.attr("href") + "\n");
         }
     }
 
     private void getSecond(File html) throws IOException {
-        Elements links = Jsoup.parse(html, "UTF-8").getElementsByTag("a");
+        Elements links = Jsoup.parse(html, "UTF-8").select("a[href]");
+        output.setText("");
         for (Element link : links) {
-            System.out.println("description=" + link.attr("description") + "CAT1=" + link.attr("CAT1")
-                    + "CAT2=" + link.attr("CAT2") + "href=" + link.attr("href"));
+            output.append("description=\"" + link.attr("description") + "\" " + link.attr("href") + "\n");
         }
     }
 
     private void getThird(File html) throws IOException {
-        Elements links = Jsoup.parse(html, "UTF-8").getElementsByTag("a");
+        Elements links = Jsoup.parse(html, "UTF-8").select("a[href]");
+        output.setText("");
         for (Element link : links) {
-            System.out.println("description=" + link.attr("description") + "CAT1=" + link.attr("CAT1")
-                    + "CAT2=" + link.attr("CAT2") + "href=" + link.attr("href"));
+            output.append(link.attr("href") + " description=\"" + link.attr("description") + "\"\n");
         }
     }
 
     private void getFourth(File html) throws IOException {
-        Elements links = Jsoup.parse(html, "UTF-8").getElementsByTag("a");
+        Elements links = Jsoup.parse(html, "UTF-8").select("a[href]");
+        output.setText("");
         for (Element link : links) {
-            System.out.println("description=" + link.attr("description") + "CAT1=" + link.attr("CAT1")
-                    + "CAT2=" + link.attr("CAT2") + "href=" + link.attr("href"));
+            output.append(link.attr("href") + " description=\"" + link.attr("description") +
+                    "\" CAT1=\"" + link.attr("CAT1") + "\" CAT2=\"" + link.attr("CAT2") + "\"\n");
         }
     }
 }
