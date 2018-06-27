@@ -17,10 +17,11 @@ public class LinkExtractor extends JFrame {
     private JFileChooser chooser;
     private File template;
     private JTextArea output;
+    private JTextArea url;
 
     private LinkExtractor() {
 
-        setTitle("Email Stream Link Extractor v1.0");
+        setTitle("Email Stream Link Extractor v2.0");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         script1 = new JRadioButton("Desc cat1 cat2 Href");
@@ -33,40 +34,59 @@ public class LinkExtractor extends JFrame {
         scriptType.add(script3);
         scriptType.add(script4);
         script1.setSelected(true);
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(1, 5, 0, 0));
+
+        JPanel radioButtons = new JPanel();
+        radioButtons.setLayout(new GridLayout(1, 4, 0, 0));
+        JPanel inputButton = new JPanel();
+        inputButton.setLayout(new GridLayout(1, 2, 0, 0));
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new GridLayout(2, 5, 0, 0));
+
         output = new JTextArea();
         output.setEditable(true);
-        JButton browse = new JButton("Browse for template");
+        output.setText("\nChoose the order of the output elements, and insert URL in the empty orange field above, or" +
+                " leave " +
+                "empty to browse for a local file...");
+        url = new JTextArea();
+        url.setEditable(true);
+        url.setBackground(Color.ORANGE);
+        url.setToolTipText("Insert URL here");
+
+
+
+        JButton browse = new JButton("Get Links");
+        browse.setPreferredSize(new Dimension(50, 50));
         browse.addActionListener((ActionEvent e) -> {
-            chooser = new JFileChooser("D:/");
-            chooser.setFileSelectionMode(0);
-            chooser.setFileFilter(new TypeOfFile());
-            System.out.println("working?");
-            chooser.showOpenDialog(this);
-            template = chooser.getSelectedFile();
+            if (url.getText().isEmpty()) {
+                chooser = new JFileChooser("D:/");
+                chooser.setFileSelectionMode(0);
+                chooser.setFileFilter(new TypeOfFile());
+                System.out.println("working?");
+                chooser.showOpenDialog(this);
+                template = chooser.getSelectedFile();
+            }
+            output.setText("");
             try {
-                if (script1.isSelected())
-                    getFirst(template);
-                else if (script2.isSelected())
-                    getSecond(template);
-                else if (script3.isSelected())
-                    getThird(template);
-                else getFourth(template);
+                getLinks();
             } catch (IOException error) {
-                System.out.println("Error encountered: " + error.getMessage());
+                output.append("Error encountered: " + error.getMessage());
             }
         });
 
-        panel.add(script1);
-        panel.add(script2);
-        panel.add(script3);
-        panel.add(script4);
-        panel.add(browse);
-        add(panel, BorderLayout.NORTH);
+
+        inputButton.add(url);
+        inputButton.add(browse);
+        radioButtons.add(script1);
+        radioButtons.add(script2);
+        radioButtons.add(script3);
+        radioButtons.add(script4);
+        mainPanel.add(radioButtons);
+        mainPanel.add(inputButton);
+        add(mainPanel, BorderLayout.PAGE_START);
         add(new JScrollPane(output), BorderLayout.CENTER);
-        add(new JLabel(("Programmed by Paul Tanasa for the Optaros Email Team")), BorderLayout.SOUTH);
-        browse.setPreferredSize(new Dimension(0, 50));
+        add(new JLabel(("Programmed by Paul Tanasa for the Optaros Email Team")), BorderLayout.PAGE_END);
+
+
         setPreferredSize(new Dimension(800, 800));
         setResizable(true);
         setVisible(true);
@@ -79,34 +99,45 @@ public class LinkExtractor extends JFrame {
 
     }
 
-    private void getFirst(File html) throws IOException {
-        Elements links = Jsoup.parse(html, "UTF-8").select("a[href]");
-        output.setText("");
+    private void getLinks() throws IOException {
+        Elements links;
+
+        if (!url.getText().isEmpty())
+            links = Jsoup.connect(url.getText()).get().select("a[href]");
+        else
+            links = Jsoup.parse(template, "UTF-8").select("a[href]");
+
+        if (script1.isSelected()) {
+            getFirst(links);
+        }
+        else if (script2.isSelected())
+            getSecond(links);
+        else if (script3.isSelected())
+            getThird(links);
+        else getFourth(links);
+    }
+
+    private void getFirst(Elements links) {
         for (Element link : links) {
             output.append("description=\"" + link.attr("description") + "\" CAT1=\"" + link.attr("CAT1")
                     + "\" CAT2=\"" + link.attr("CAT2") + "\" " + link.attr("href") + "\n");
         }
     }
 
-    private void getSecond(File html) throws IOException {
-        Elements links = Jsoup.parse(html, "UTF-8").select("a[href]");
-        output.setText("");
+    private void getSecond(Elements links) {
         for (Element link : links) {
             output.append("description=\"" + link.attr("description") + "\" " + link.attr("href") + "\n");
         }
     }
 
-    private void getThird(File html) throws IOException {
-        Elements links = Jsoup.parse(html, "UTF-8").select("a[href]");
-        output.setText("");
+    private void getThird(Elements links) {
         for (Element link : links) {
             output.append(link.attr("href") + " description=\"" + link.attr("description") + "\"\n");
         }
     }
 
-    private void getFourth(File html) throws IOException {
-        Elements links = Jsoup.parse(html, "UTF-8").select("a[href]");
-        output.setText("");
+    private void getFourth(Elements links) {
+
         for (Element link : links) {
             output.append(link.attr("href") + " description=\"" + link.attr("description") +
                     "\" CAT1=\"" + link.attr("CAT1") + "\" CAT2=\"" + link.attr("CAT2") + "\"\n");
