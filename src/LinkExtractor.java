@@ -1,3 +1,5 @@
+import org.apache.commons.codec.binary.Base64;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -7,6 +9,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+
 
 
 public class LinkExtractor extends JFrame {
@@ -45,13 +48,11 @@ public class LinkExtractor extends JFrame {
         output = new JTextArea();
         output.setEditable(true);
         output.setText("\nChoose the order of the output elements, and insert URL in the empty orange field above, or" +
-                " leave " +
-                "empty to browse for a local file...");
+                " leave empty to browse for a local file...");
         url = new JTextArea();
         url.setEditable(true);
         url.setBackground(Color.ORANGE);
         url.setToolTipText("Insert URL here");
-
 
 
         JButton browse = new JButton("Get Links");
@@ -101,16 +102,19 @@ public class LinkExtractor extends JFrame {
 
     private void getLinks() throws IOException {
         Elements links;
-
+        String aemUsername = "";  // add username to login to the AEM page
+        String aemPassword = "";  // add password to login to the AEM page
+        String login = aemUsername + ":" + aemPassword;
+        String base64login = new String(Base64.encodeBase64(login.getBytes()));
         if (!url.getText().isEmpty())
-            links = Jsoup.connect(url.getText()).get().select("a[href]");
+            links = Jsoup.connect(url.getText()).header("Authorization", "Basic " + base64login)
+                    .get().select("a[href]");
         else
             links = Jsoup.parse(template, "UTF-8").select("a[href]");
 
         if (script1.isSelected()) {
             getFirst(links);
-        }
-        else if (script2.isSelected())
+        } else if (script2.isSelected())
             getSecond(links);
         else if (script3.isSelected())
             getThird(links);
