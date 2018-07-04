@@ -24,7 +24,7 @@ public class LinkExtractor extends JFrame {
 
     private LinkExtractor() {
 
-        setTitle("Email Stream Link Extractor v2.0");
+        setTitle("Email Stream Link Extractor v2.1");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         script1 = new JRadioButton("Desc cat1 cat2 Href");
@@ -123,6 +123,7 @@ public class LinkExtractor extends JFrame {
 
     private void getFirst(Elements links) {
         for (Element link : links) {
+            if (!link.attr("href").equals("#"))
             output.append("description=\"" + link.attr("description") + "\" CAT1=\"" + link.attr("CAT1")
                     + "\" CAT2=\"" + link.attr("CAT2") + "\" " + link.attr("href") + "\n");
         }
@@ -130,12 +131,14 @@ public class LinkExtractor extends JFrame {
 
     private void getSecond(Elements links) {
         for (Element link : links) {
+            if (!link.attr("href").equals("#"))
             output.append("description=\"" + link.attr("description") + "\" " + link.attr("href") + "\n");
         }
     }
 
     private void getThird(Elements links) {
         for (Element link : links) {
+            if (!link.attr("href").equals("#"))
             output.append(link.attr("href") + " description=\"" + link.attr("description") + "\"\n");
         }
     }
@@ -143,6 +146,7 @@ public class LinkExtractor extends JFrame {
     private void getFourth(Elements links) {
 
         for (Element link : links) {
+            if (!link.attr("href").equals("#"))
             output.append(link.attr("href") + " description=\"" + link.attr("description") +
                     "\" CAT1=\"" + link.attr("CAT1") + "\" CAT2=\"" + link.attr("CAT2") + "\"\n");
         }
