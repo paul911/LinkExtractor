@@ -4,6 +4,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.FocusListener;
 import java.awt.event.FocusEvent;
 
@@ -125,7 +126,7 @@ public class LinkExtractor extends JFrame {
         mainPanel.add(inputButton);
         add(mainPanel, BorderLayout.PAGE_START);
         add(new JScrollPane(output), BorderLayout.CENTER);
-        add(new JLabel(("Programmed by Paul Tanasa for the Optaros Email Team")), BorderLayout.PAGE_END);
+        add(new JLabel(("Programmed by Paul Tanasa for the Optaros Email Team")), BorderLayout.AFTER_LAST_LINE);
 
         setPreferredSize(new Dimension(800, 800));
         setResizable(true);
@@ -165,6 +166,7 @@ public class LinkExtractor extends JFrame {
         else if (script3.isSelected())
             getThird(links);
         else getFourth(links);
+        finish();
     }
 
     // methods for extracting links according to the order of attributes chosen using the radio buttons
@@ -200,6 +202,12 @@ public class LinkExtractor extends JFrame {
                 output.append(link.attr("href") + " description=\"" + link.attr("description") +
                         "\" CAT1=\"" + link.attr("CAT1") + "\" CAT2=\"" + link.attr("CAT2") + "\"\n");
         }
+    }
+
+    private void finish() {
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(output.getText()), null);
+        JOptionPane.showMessageDialog(this, "Lniks have been extracted and copied to the clipboard",
+                "Success!", JOptionPane.INFORMATION_MESSAGE);
     }
 }
 
